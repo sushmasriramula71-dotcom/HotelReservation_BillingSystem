@@ -1,0 +1,1 @@
+{'room_no': '106', 'room_type': 'Premium', 'floor': '1'}--invalid room type

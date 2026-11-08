@@ -10,5 +10,17 @@ class RoomNotAvailableError(HotelError):
 class InvalidGuestError(HotelError):
     pass
 
+class BookingNotFoundError(HotelError):
+    pass
+
 class BookingStatusError(HotelError):
+    pass
+
+class InvalidDateError(HotelError):
+    pass
+
+class DatabaseOperationError(HotelError):
+    pass
+
+class InvalidRoomDataError(HotelError):
     pass

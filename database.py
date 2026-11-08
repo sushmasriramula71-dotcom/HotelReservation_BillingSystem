@@ -1,6 +1,6 @@
 import sqlite3
 import csv
-con=sqlite3.connect("billl.db")
+con=sqlite3.connect("databases.db")
 cursor=con.cursor()
 
 query1="""create table if not exists rooms(
@@ -28,9 +28,17 @@ query3="""create table if not exists bookings(
         guests int,
         total_amount decimal(10,2),
         status varchar(20) default "CONFIRMED",
+        breakfast int default 0,
+        room_charge decimal(10,2) default 0,
+        extra_guest_charge decimal(10,2) default 0,
+        breakfast_charge decimal(10,2) default 0,
+        long_stay_discount decimal(10,2) default 0,
+        loyalty_discount decimal(10,2) default 0,
+        gst decimal(10,2) default 0,
         foreign key (guest_id) references guests(guest_id),
         foreign key (room_no) references rooms(room_no))"""
 cursor.execute(query3)
+
 
 con.commit()
 
@@ -50,9 +58,11 @@ with open("rooms.csv",'r') as file:
             cursor.execute("""insert or ignore into rooms(room_no,room_type,floor) values(?,?,?)""",(room_no,room_type,floor))
 
         except ValueError as e:
-            print(row,e)
+            with open("errors.txt",'w')as error:
+                error.write(f"{row}--{e}")
+                print("Errors saved to error.txt file")
 
 con.commit()
-print("room vals inserted")
+# print("room vals inserted")
 
 

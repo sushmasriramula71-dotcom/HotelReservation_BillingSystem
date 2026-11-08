@@ -1,0 +1,3 @@
+Booking id,Guest Name,Mobile,Email,Room Number,Room Type,Check-in,Check-out,Guests,Total Amount,Status
+1,Sushma,8977196783,sushma@gmail.com,101,Standard,2026-11-05,2026-11-06,1,3192,CHECKED_IN
+2,Diva,9008897890,diva@gmail.com,101,Standard,2026-11-07,2026-11-08,1,3752,CANCELLED
