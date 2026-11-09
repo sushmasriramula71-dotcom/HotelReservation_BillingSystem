@@ -1,6 +1,6 @@
 import sqlite3
 import csv
-con=sqlite3.connect("databases.db")
+con=sqlite3.connect("hoteld.db")
 cursor=con.cursor()
 
 query1="""create table if not exists rooms(

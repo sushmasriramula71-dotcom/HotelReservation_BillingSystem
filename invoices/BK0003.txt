@@ -1,0 +1,28 @@
+========STAYEASY HOTEL========
+        INVOICES     
+------------------------------------
+Booking ID: 3
+Guest Name: Varsha
+Mobile: 8121038386
+Email: varsha@gmail.com
+Room number: 201
+Room type: Deluxe
+Floor: 2
+Check-in: 2026-11-09
+check-out: 2026-11-11
+Guests: 3
+
+------------Night-Wise Charges------------
+2026-11-09 | Room: Rs. 4000 | Extra Guest: Rs. 800 | Breakfast: Rs. 0
+2026-11-10 | Room: Rs. 4000 | Extra Guest: Rs. 800 | Breakfast: Rs. 0
+
+-------------Price Summary---------------
+Room Charge: Rs. 0
+Extra Guest Charge: Rs. 0
+Breakfast Charge: Rs. 0
+Long stay Discount: Rs. 0
+Loyalty Discount: Rs. 0
+GST: Rs. 0
+------------------------------------
+TOTAL AMOUNT: Rs. 10752
+====================================

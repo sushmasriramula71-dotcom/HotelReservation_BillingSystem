@@ -2,8 +2,11 @@ from model import StandardRoom,DeluxeRoom,SuiteRoom
 from database import con, cursor
 from exception import (InvalidGuestError,InvalidRoomError,RoomNotAvailableError,BookingStatusError,BookingNotFoundError)
 from datetime import datetime,timedelta,date
-from pricing import (calculate_nights,calculate_room_charge,calculate_extra_guest_charge,
-                     calculate_breakfast_charge,calculate_long_stay_discount,calculate_loyalty_discount,calculate_weekend_rate,calculate_gst)
+from pricing import *
+import os
+# from pathlib import path 
+import sqlite3
+            
 
 
 def register_guests():
@@ -14,83 +17,79 @@ def register_guests():
         else:
             break
 
-    for i in range(no_of_guests):
-        while True:
-            try:
-                name=input("Enetr guest name: ").strip()
-                if name=="":
-                    # print("name can't be null")
-                    raise InvalidGuestError("Guest name can't be empty")
-                else:
-                    break
-            except InvalidGuestError as e:
-                print(e)
-
-        while True: 
-            mobile=input("Enter mobilenumber: ").strip()
-            try:
-                if mobile=="":
-                    # print("mobile can't be null")
-                    raise InvalidGuestError("Mobile can't be null")
-                elif len(mobile)!=10:
-                    # print("mobile num should contains 10 digits")
-                    raise InvalidGuestError("Invalid Mobile number")
-                elif not mobile.isdigit():
-                    # print("mobile number should contains only digits")
-                    raise  InvalidGuestError("Mobile number should contain only digits")
-                elif mobile[0] not in '6789':
-                    # print("mobile num should start with 6789")
-                    raise InvalidGuestError("mobile number should start with 6789")
-                
-                else:
-                    break
-            except InvalidGuestError as e:
-                print(e)
-
-        while True:
-            email=input("Enter eamil: ").strip()
-            try:
-                if email=="":
-                    # print("email can't be null")
-                    raise InvalidGuestError("email can't be null")
-                elif "@" not in email or "." not in email: 
-                    # print("email format is not valid")
-                    raise InvalidGuestError("invalid email address")
-                elif email.index("@")>email.index("."):
-                    # print("email format is not valid")
-                    raise InvalidGuestError("invalid email format")
-                else:
-                    break
-            except InvalidGuestError as e:
-                print(e)
-
+    
+    while True:
         try:
-            cursor.execute("select guest_id from guests where mobile=?",(mobile,))
-            existing_guest=cursor.fetchone()
-
-            if existing_guest:
-                guest_id=existing_guest[0]
-                print("Returning guest")
-                print("Guest id: ",guest_id)
+            name=input("Enetr guest name: ").strip()
+            if name=="":
+                # print("name can't be null")
+                raise InvalidGuestError("Guest name can't be empty")
             else:
-                cursor.execute("""insert into guests(name,mobile,email) values(?,?,?)""",(name,mobile,email))
-                con.commit()
-
-
-                guest_id=cursor.lastrowid
-                print("Guest registered sucessfully")
-                print("guestid",guest_id)
-            if i==0:
-                primary_guest_id=guest_id
-
+                break
         except InvalidGuestError as e:
             print(e)
-            return None, None
 
-        except Exception as e:
-            con.rollback()
-            print("Database error",e)
-            return None,None
+    while True: 
+        mobile=input("Enter mobilenumber: ").strip()
+        try:
+            if mobile=="":
+                # print("mobile can't be null")
+                raise InvalidGuestError("Mobile can't be null")
+            elif len(mobile)!=10:
+                # print("mobile num should contains 10 digits")
+                raise InvalidGuestError("Invalid Mobile number")
+            elif not mobile.isdigit():
+                # print("mobile number should contains only digits")
+                raise  InvalidGuestError("Mobile number should contain only digits")
+            elif mobile[0] not in '6789':
+                # print("mobile num should start with 6789")
+                raise InvalidGuestError("mobile number should start with 6789")
+            
+            else:
+                break
+        except InvalidGuestError as e:
+            print(e)
+
+    while True:
+        email=input("Enter eamil: ").strip()
+        try:
+            if email=="":
+                # print("email can't be null")
+                raise InvalidGuestError("email can't be null")
+            elif "@" not in email or "." not in email: 
+                # print("email format is not valid")
+                raise InvalidGuestError("invalid email address")
+            elif email.index("@")>email.index("."):
+                # print("email format is not valid")
+                raise InvalidGuestError("invalid email format")
+            else:
+                break
+        except InvalidGuestError as e:
+            print(e)
+
+    try:
+        # cursor.execute("select guest_id from guests where mobile=?",(mobile,))
+        # existing_guest=cursor.fetchone()
+
+        
+        cursor.execute("""insert into guests(name,mobile,email) values(?,?,?)""",(name,mobile,email))
+        con.commit()
+
+
+            # guest_id=cursor.lastrowid
+            # print("Guest registered sucessfully")
+            # print("guestid",guest_id)
+            # if i==0:
+        primary_guest_id=cursor.lastrowid
+
+    except InvalidGuestError as e:
+        print(e)
+        return None, None
+
+    except Exception as e:
+        con.rollback()
+        print("Database error",e)
+        return None,None
     return primary_guest_id,no_of_guests
 
 def create_room(room_no,room_type,floor):
@@ -201,16 +200,16 @@ def generate_invoice(booking_id):
         booking=cursor.fetchone()
         if booking is None:
             raise BookingNotFoundError("Booking not found")
-        check_in_date=datetime.strptime(booking_id[1],"%Y-%m-%d").date()
-        check_out_date=datetime.strptime(booking_id[2],"%Y-%m-%d").date()
-        room=create_room(booking_id[15],booking_id[16],booking_id[17])
+        check_in_date=datetime.strptime(booking[1],"%Y-%m-%d").date()
+        check_out_date=datetime.strptime(booking[2],"%Y-%m-%d").date()
+        room=create_room(booking[15],booking[16],booking[17])
 
         file_name="invoices/BK"+str(booking_id).zfill(4)+".txt"
         with open(file_name,'w') as file:
             file.write("========STAYEASY HOTEL========\n")
             file.write("        INVOICES     \n")
             file.write("------------------------------------\n")
-            file.write("Booking ID: ",+str(booking_id[0])+"\n")
+            file.write("Booking ID: "+str(booking[0])+"\n")
             file.write("Guest Name: "+booking[12]+"\n")
             file.write("Mobile: "+booking[13]+"\n")
             file.write("Email: "+booking[14]+"\n")
@@ -226,7 +225,7 @@ def generate_invoice(booking_id):
                 current_date=check_in_date+timedelta(days=i)
                 nightly_rate=calculate_weekend_rate(room,current_date)
                 extra_charge=room.get_extra_guest_charge(booking[3])
-                breakfasr_charge=0
+                breakfast_charge=0
                 if booking[5]:
                     breakfast_charge=(room.get_breakfast_charge()*booking[3])
                 file.write(str(current_date) +
@@ -262,15 +261,20 @@ def check_out_booking():
         cursor.execute("""select status from bookings where booking_id=?""",(booking_id,))
         booking=cursor.fetchone()
 
+        
         if booking is None:
             raise BookingNotFoundError("Booking not found")
         status=booking[0].upper()
-        if status !="CHECHED_IN":
+
+        print("statusvalue: ",repr(status))
+        print("Comparision: ",status!="CHECKED_IN")
+        
+        if status !="CHECKED_IN":
             raise BookingStatusError("check not allowd current status: "+status)
-        cursor.execute("""update bookings set status=?""",("CHECKED_OUT",booking_id))
+        cursor.execute("""update bookings set status=? where booking_id=? """,("CHECKED_OUT",booking_id))
         con.commit()
         print("checkout successfull")
-        generate_invoice()
+        generate_invoice(booking_id)
 
     except BookingNotFoundError as e:
         print(e)
@@ -285,6 +289,117 @@ def check_out_booking():
         con.rollback()
         print("Checkout failed: ",e)
 
+
+
+# def generate_invoice(booking_id):
+#     cursor.execute("""
+#         select b.booking_id,b.room_no,b.check_in,b.check_out,
+#                b.guests,b.breakfast,b.total_amount,
+#                b.room_charge,b.extra_guest_charge,
+#                b.breakfast_charge,b.long_stay_discount,
+#                b.loyalty_discount,b.gst,
+#                g.name,g.mobile,g.email,r.room_type
+#         from bookings b
+#         join guests g on b.guest_id=g.guest_id
+#         join rooms r on b.room_no=r.room_no
+#         where b.booking_id=?
+#     """,(booking_id,))
+
+#     booking=cursor.fetchone()
+
+#     if booking is None:
+#         print("Booking details not found")
+#         return None
+
+#     invoice_folder=Path("invoices")
+#     invoice_folder.mkdir(exist_ok=True)
+
+#     invoice_file=invoice_folder/("BK"+str(booking_id)+".txt")
+
+#     file=open(invoice_file,"w")
+
+#     file.write("========== STAYEASY HOTEL ==========\n")
+#     file.write("              INVOICE\n")
+#     file.write("====================================\n\n")
+
+#     file.write("Booking ID: "+str(booking[0])+"\n")
+#     file.write("Guest Name: "+str(booking[13])+"\n")
+#     file.write("Mobile Number: "+str(booking[14])+"\n")
+#     file.write("Email: "+str(booking[15])+"\n")
+#     file.write("Room Number: "+str(booking[1])+"\n")
+#     file.write("Room Type: "+str(booking[16])+"\n")
+#     file.write("Check-in: "+str(booking[2])+"\n")
+#     file.write("Check-out: "+str(booking[3])+"\n")
+#     file.write("Guest Count: "+str(booking[4])+"\n")
+#     file.write("Breakfast: "+str(booking[5])+"\n")
+
+#     file.write("\n========== BILL DETAILS ==========\n")
+
+#     file.write("Room Charge: Rs."+str(booking[7])+"\n")
+#     file.write("Extra Guest Charge: Rs."+str(booking[8])+"\n")
+#     file.write("Breakfast Charge: Rs."+str(booking[9])+"\n")
+#     file.write("Long Stay Discount: Rs."+str(booking[10])+"\n")
+#     file.write("Loyalty Discount: Rs."+str(booking[11])+"\n")
+#     file.write("GST: Rs."+str(booking[12])+"\n")
+
+#     file.write("\n========== BILL SUMMARY ==========\n")
+#     file.write("Total Amount: Rs."+str(booking[6])+"\n")
+
+#     file.write("====================================\n")
+#     file.write("       THANK YOU FOR VISITING!\n")
+#     file.write("====================================\n")
+
+#     file.close()
+
+#     print("Invoice generated:",invoice_file)
+#     return invoice_file
+
+
+
+
+
+
+# def checkout_booking(booking_id):
+#     try:
+#         cursor.execute("""
+#             select status from bookings
+#             where booking_id=?
+#         """,(booking_id,))
+
+#         booking=cursor.fetchone()
+
+#         if booking is None:
+#             raise BookingNotFoundError("Booking ID not found")
+
+#         status=booking[0].upper()
+
+#         if status!="CHECKED_IN":
+#             raise BookingStatusError("Check-out not allowed current status: "+status)
+
+#         invoice_file=generate_invoice(booking_id)
+
+#         if invoice_file is None:
+#             return
+
+#         cursor.execute("""
+#             update bookings
+#             set status=?
+#             where booking_id=?
+#         """,("CHECKED_OUT",booking_id))
+
+#         con.commit()
+
+#         print("Guest checked out successfully!")
+
+#     except BookingNotFoundError as e:
+#         print(e)
+
+#     except BookingStatusError as e:
+#         print(e)
+
+#     except Exception as e:
+#         con.rollback()
+#         print("Checkout failed:",e)
 
 
 def check_in_booking():
@@ -304,7 +419,7 @@ def check_in_booking():
         if today!=check_in_date:
             print("Check in is allowed only on the booking date")
             return 
-        cursor.execute("""update bookings set status="CHECKED_IN" where booking_id=?""",(booking_id,))
+        cursor.execute("""update bookings set status=? where booking_id=?""",("CHECKED_IN",booking_id,))
         con.commit()
         print("Check in successfull")
     except BookingStatusError as e:

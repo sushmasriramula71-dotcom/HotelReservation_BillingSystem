@@ -8,7 +8,7 @@ from main import (register_guests,select_room_type,find_available_room,create_ro
          
 
 while True:
-    print("""   STAYEASY HOTEL  
+    print("""       STAYEASY HOTEL  
         1.Search room availability
         2.Create booking
         3.Check-in
